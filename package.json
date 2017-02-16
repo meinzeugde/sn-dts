@@ -4,7 +4,10 @@
     "description": "A automated way to load type definitions for various tables to you projects. Please refer to README.MD",
     "main": "-",
     "devDependencies": {
-        "w3c-xmlhttprequest": "^2.1.2"
+        "w3c-xmlhttprequest": "^2.1.2",
+        "minimist": "^1.1.1",
+        "assert-plus": "^1.0.0",
+        "colors": "^1.1.0"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"

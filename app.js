@@ -1,7 +1,8 @@
 var fs = require('fs');
 var XMLHttpRequest = require('w3c-xmlhttprequest').XMLHttpRequest;
-var apiConfig = require('./sync-config.json');
-var apiTables = require('./dts_tables.json');
+var argv = require('minimist')(process.argv.slice(2));
+var configLoader = require('./lib/config.js'),
+    config = {};
 
 /**
  * Exit node app
@@ -15,13 +16,13 @@ function exitApp(code) {
 // entry point
 function init() {
     try {
-        for (var rootKey in apiConfig.roots) {
-
-            var host = apiConfig.roots[rootKey].host;
-            var auth = apiConfig.roots[rootKey].auth;
-            for (var i in apiTables) {
-                download(host, auth, apiTables[i]);
-            }
+        configLoader.setConfigLocation(argv.config);
+        config = configLoader.getConfig();
+        var host = config.host;
+        var auth = config.auth;
+        var apiTables = config.tables;
+        for (var i in apiTables) {
+            download(host, auth, apiTables[i]);
         }
     } catch (error) {
         console.error(error);
@@ -44,7 +45,7 @@ function download(host, auth, table) {
             if (contentType != 'application/octet-stream') {
                 console.error('table ' + table + ' does not exist');
             } else {
-                var filename = './typings/servicenow-dts/GlideRecord/' + table + '.d.ts';
+                var filename = 'typings/servicenow-dts/GlideRecord/' + table + '.d.ts';
                 var fileStream = fs.createWriteStream(filename);
                 fileStream.write(client.response);
                 fileStream.end();

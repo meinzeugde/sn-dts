@@ -19,17 +19,18 @@ npm install
 
 ## 3. Prepare your project
 
-1. Copy the `dts_tables.json` to the root of your project folder and modify to your needs
-2. In your project folder, open your terminal and run:
+1. Copy the `dts-config.json` to the root of your project folder and modify to your needs
+2. Make sure, that the following directory is available: `typings/servicenow-dts/GlideRecord`, otherwise create it
+3. In your project folder, open your terminal and run:
 
 ```sh
-node /c/sn-dts/app.js
+node /c/sn-dts/app.js --config ./dts-config.json
 ```
 
-OPTION: create a shortcut by adding the following line to your .bashrc
+OPTION: create a shortcut by adding the following line to your .bashrc, don't forget to `source ~/.bashrc`
 
 ```sh
-alias sndts='node /c/sn-dts/app.js'
+alias sndts='node /c/sn-dts/app.js --config ./dts-config.json'
 ```
 
 ## 4. Start the script every time you need to update your typescript definitions
