@@ -1,6 +1,6 @@
 {
-    "name": "project",
-    "version": "1.0.0",
+    "name": "sn-dts",
+    "version": "0.1.0",
     "description": "A automated way to load type definitions for various tables to you projects. Please refer to README.MD",
     "main": "-",
     "devDependencies": {
