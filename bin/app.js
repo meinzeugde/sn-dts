@@ -10,22 +10,16 @@ require('colors');
 var fs = require('fs-extra');
 var path = require('path');
 // used to generate a hash of a file
-var crypto = require('crypto');
-var glob = require("glob");
 var winston = require('winston');
 var moment = require('moment');
 
 // ---------------------------------------------------
 // custom imports
 var configLoader = require('../lib/config'),
+    snClient = require('../lib/sn-client'),
     config = {},
     upgradeNeeded = require('../lib/upgrade'),
-    sncClient = require('../lib/snc-client'),
-    notify = require('../lib/notify'),
-    SearchUtil = require('../lib/search'),
-    Search = SearchUtil.Search,
-    FileRecordUtil = require('../lib/file-record'),
-    FileRecord = FileRecordUtil.FileRecord;
+    notify = require('../lib/notify');
 
 // our wrapper for winston used for logging
 var logit = {};
@@ -88,6 +82,7 @@ function init() {
     }
 
     function initComplete() {
+        snClient.setLogger(logit); //hand over logit to snClient
         logit.log('initComplete.. download table definitions..');
         downloadTableDefinitions();
     }
@@ -110,7 +105,7 @@ function exitApp(code) {
  * may be needed in other modules.
  */
 function enrichConfig() {
-    // support for 3rd party logging (eg, FileRecord, notify and Search)
+    // support for 3rd party logging (notify)
     config._logger = logit;
 }
 
@@ -132,17 +127,6 @@ function handleError(err, context) {
     if (context) {
         logit.error('  handleError context:', context);
     }
-}
-
-function getSncClient(root) {
-    var host = config.roots[root];
-    if (!host._client) {
-        host._logger = logit;
-        host.debug = config.debug;
-        host.proxy = config.proxy || null;
-        host._client = new sncClient(host);
-    }
-    return host._client;
 }
 
 /*
@@ -185,9 +169,18 @@ function setupLogging() {
 }
 
 function downloadTableDefinitions() {
-    logit.info('*** DOWNLOAD TABLE DEFINITIONS. *** (TODO)');
+    for (var r in config.roots) {
+        var basePath = r,
+            root = config.roots[r];
+        snClient.setInstance(root.host, root.auth, 'https')
+
+        snClient.login(function() {
+            logit.info('*** DOWNLOAD TABLE DEFINITIONS. *** (TODO)');
+        }, function(error) {
+            logit.error('[ERROR]: Login failed - ' + error);
+            // exitApp(0);
+        });
+    }
 }
-
-
 
 init();
