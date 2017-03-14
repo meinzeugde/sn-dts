@@ -1,47 +1,45 @@
 {
-  "name": "sn-filesync",
-  "version": "4.2.3",
-  "description": "Enables out of instance record updates for ServiceNow.",
-  "main": "bin/app.js",
-  "bin": {
-    "filesync": "./bin/app.js"
-  },
-  "dependencies": {
-    "assert-plus": "^1.0.0",
-    "chokidar": "^1.0.0",
-    "colors": "^1.1.0",
-    "fs-extra": "^0.26.5",
-    "glob": "^6.0.0",
-    "minimist": "^1.1.1",
-    "moment": "^2.10.2",
-    "node-notifier": "^4.3.1",
-    "osx-notifier": "^0.2.1",
-    "@mishguru/restler": "https://github.com/mishguruorg/restler/tarball/master",
-    "winston": "^1.0.0"
-  },
-  "engines": {
-    "node": ">=4.2.6 || >=5.0"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/dynamicdan/filesync"
-  },
-  "keywords": [
-    "servicenow",
-    "sync",
-    "files",
-    "updates",
-    "editing",
-    "instance"
-  ],
-  "author": "DynamicDan",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/dynamicdan/filesync/issues"
-  },
-  "homepage": "https://github.com/dynamicdan/filesync"
+    "name": "sn-dts",
+    "version": "2.0.0",
+    "description": "Download TypeScript Definition Files from Service Now tables for use with GlideRecord.",
+    "main": "bin/app.js",
+    "bin": {
+        "filesync": "./bin/app.js"
+    },
+    "dependencies": {
+        "assert-plus": "^1.0.0",
+        "chokidar": "^1.0.0",
+        "colors": "^1.1.0",
+        "fs-extra": "^0.26.5",
+        "glob": "^6.0.0",
+        "minimist": "^1.1.1",
+        "moment": "^2.10.2",
+        "node-notifier": "^4.3.1",
+        "osx-notifier": "^0.2.1",
+        "@mishguru/restler": "https://github.com/mishguruorg/restler/tarball/master",
+        "winston": "^1.0.0"
+    },
+    "engines": {
+        "node": ">=4.2.6 || >=5.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dynamicdan/filesync"
+    },
+    "keywords": [
+        "servicenow",
+        "typescript",
+        "definition files",
+        "d.ts"
+    ],
+    "author": "meinzeugde",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/meinzeugde/sn-dts/issues"
+    },
+    "homepage": "https://github.com/meinzeugde/sn-dts"
 }

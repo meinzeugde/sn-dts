@@ -1,0 +1,19 @@
+{
+    "roots": {
+        "/sn_projects/instance1": {
+            "host": "instance1.service-now.com",
+            "user": "youruser",
+            "pass": "yourpassword"
+        },
+        "/sn_projects/instance2": {
+            "host": "instance2.service-now.com",
+            "auth": "base64encodededcredentials"
+        }
+    },
+    "debug": false,
+    "tables": [
+        "task",
+        "incident",
+        "sys_user"
+    ]
+}
