@@ -16,6 +16,7 @@
         "node-notifier": "^4.3.1",
         "osx-notifier": "^0.2.1",
         "request": "^2.40.0",
+        "tough-cookie": "^0.12.1",
         "winston": "^1.0.0"
     },
     "engines": {

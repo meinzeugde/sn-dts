@@ -172,15 +172,32 @@ function downloadTableDefinitions() {
     for (var r in config.roots) {
         var basePath = r,
             root = config.roots[r];
-        snClient.setInstance(root.host, root.auth, 'https')
+        snClient.setInstance(basePath, root.host, root.auth, 'https');
 
-        snClient.login(function() {
-            logit.info('*** DOWNLOAD TABLE DEFINITIONS. *** (TODO)');
+        snClient.establishConnection(function() {
+
+            for (var t in config.tables) {
+                var tableName = config.tables[t];
+                logit.info('*** Downloading table definition for ' + tableName + '...');
+                snClient.getTableDefinitionAsJson(tableName, function(recordsArr) {
+                    saveTableDefinitionAsJsonFile(basePath, tableName, recordsArr);
+                }, function(errorObj) {
+                    logit.error('getTableDefinitionAsJson failed: ' + JSON.stringify(errorObj));
+                });
+            }
         }, function(error) {
-            logit.error('[ERROR]: Login failed - ' + error);
+            logit.error('Login failed - ' + error);
             // exitApp(0);
         });
     }
+}
+
+function saveTableDefinitionAsJsonFile(basePath, tableName, content) {
+    var filepath = basePath + '/.sn-dts/requestJson/';
+    var filename = filepath + tableName + '.json'
+    fs.outputFile(filename, JSON.stringify(content, null, 4), function(err) {
+        if (err) logit.error('Error updating/writing table definition JSON. path: ' + filename);
+    });
 }
 
 init();
