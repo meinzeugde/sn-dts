@@ -1,2 +1,4 @@
 .vscode
 node_modules
+test/.*
+test/app.config.json

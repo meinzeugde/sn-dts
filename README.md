@@ -56,3 +56,11 @@ alias sndts='node /c/sn-dts/app.js --config ./app.config.json'
 ```sh
 sndts
 ```
+
+# Development
+
+## Test
+
+Within this project there is a `test` folder with an example config.
+Just copy and rename `app.config.json.example` to `app.config.json` (do not delete the original file).
+After editing the new config file with the appropriate credentials you might test with `node bin/app.js --config ./test/app.config.json`.

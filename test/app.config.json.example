@@ -1,0 +1,12 @@
+{
+    "roots": {
+        "./test": {
+            "host": "yourinstance.service-now.com",
+            "auth": "yourauthkey"
+        }
+    },
+    "debug": false,
+    "tables": [
+        "task"
+    ]
+}
