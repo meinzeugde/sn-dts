@@ -12,11 +12,12 @@ var path = require('path');
 // used to generate a hash of a file
 var winston = require('winston');
 var moment = require('moment');
+var request = require('request');
+var xml2js = require('xml2js');
 
 // ---------------------------------------------------
 // custom imports
 var configLoader = require('../lib/config'),
-    snClient = require('../lib/sn-client'),
     config = {},
     upgradeNeeded = require('../lib/upgrade'),
     notify = require('../lib/notify');
@@ -82,7 +83,6 @@ function init() {
     }
 
     function initComplete() {
-        snClient.setLogger(logit); //hand over logit to snClient
         logit.log('initComplete.. download table definitions..');
         downloadTableDefinitions();
     }
@@ -168,36 +168,114 @@ function setupLogging() {
 
 }
 
+function getBaseUrl(basePath, host, protocol) {
+    var protocol = protocol ? protocol : 'https'; // allow testing on localhost/http but default to https
+    return protocol + '://' + ((host.substr(-1) != '/') ? host + '/' : host);
+}
+
 function downloadTableDefinitions() {
     for (var r in config.roots) {
         var basePath = r,
-            root = config.roots[r];
-        snClient.setInstance(basePath, root.host, root.auth, 'https');
+            root = config.roots[r],
+            baseUrl = getBaseUrl(basePath, root.host, 'https'),
+            instanceRequest = request.defaults({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + root.auth
+                }
+            });
 
-        snClient.establishConnection(function() {
-
-            for (var t in config.tables) {
-                var tableName = config.tables[t];
-                logit.info('*** Downloading table definition for ' + tableName + '...');
-                snClient.getTableDefinitionAsJson(tableName, function(recordsArr) {
-                    saveTableDefinitionAsJsonFile(basePath, tableName, recordsArr);
-                }, function(errorObj) {
-                    logit.error('getTableDefinitionAsJson failed: ' + JSON.stringify(errorObj));
-                });
-            }
-        }, function(error) {
-            logit.error('Login failed - ' + error);
-            // exitApp(0);
-        });
+        for (var t in config.tables) {
+            var tableName = config.tables[t];
+            instanceRequest(baseUrl + tableName + '.do?SCHEMA', function(error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    //convert body from XML to JSON and parse data
+                    var parseString = xml2js.parseString;
+                    parseString(body, function(err, result) {
+                        if (!err) {
+                            //parse JSON data
+                            var dtsContent = convertSchemaToDts(tableName, result);
+                            if (dtsContent) {
+                                //write to file
+                                var filename = path.resolve(basePath + '/typings/servicenow-dts/GlideRecord/' + tableName + '.d.ts');
+                                fs.outputFile(filename, dtsContent, function(err) {
+                                    if (err) console.log('Error updating/writing d.ts file. path: ' + filename);
+                                });
+                            }
+                        } else {
+                            logit.error('Parsing of XML failed - ' + err);
+                        }
+                    });
+                } else {
+                    logit.error('Connection failed - ' + error + ' (' + response.statusCode + ')');
+                }
+            });
+        }
     }
 }
 
-function saveTableDefinitionAsJsonFile(basePath, tableName, content) {
-    var filepath = basePath + '/.sn-dts/requestJson/';
-    var filename = filepath + tableName + '.json'
-    fs.outputFile(filename, JSON.stringify(content, null, 4), function(err) {
-        if (err) logit.error('Error updating/writing table definition JSON. path: ' + filename);
-    });
+function convertSchemaToDts(tableName, schema) {
+    try {
+        var contentArr = [];
+        var interfaceName = 'I' + snakeToCamel(tableName, true);
+        var elements = schema[tableName].element;
+
+        //Generate Header
+        contentArr = contentArr.concat(
+            'declare module sn {',
+            '   export module Server {',
+            '       export interface IGlideServerRecord {',
+            '           new (type: \'' + tableName + '\'): sn.Types.' + interfaceName + ';',
+            '       }',
+            '   }',
+            '',
+            '   export module Types {',
+            '       export interface ' + interfaceName + ' extends sn.Server.IGlideServerRecord {'
+        );
+
+        //Sort Attributes by name
+        elements.sort(function(a, b) {
+            if (a['$'].name > b['$'].name) return 1;
+            if (a['$'].name < b['$'].name) return -1;
+            return 0;
+        });
+
+        //Generate Attribute Definitions
+        for (c in elements) {
+            var column = elements[c]['$'];
+            // contentArr = contentArr.concat('           /* "' + 'TBD' + '" */');
+            contentArr = contentArr.concat('           ' + column.name + ': ' + column.internal_type + '; // ' + column.internal_type + ' (' + column.max_length + ')' + getChoiceList(column) + getReference(column));
+        }
+
+        //Generate Footer
+        contentArr = contentArr.concat(
+            '       }',
+            '   }',
+            '}'
+        );
+
+        return contentArr.join("\n");
+    } catch (err) {
+        logit.error('Converting Schema to d.ts failed - ' + err);
+        return false;
+    }
 }
+
+function snakeToCamel(string, capitalized) {
+    var retVal = string.replace(/(\_\w)/g, function(m) { return m[1].toUpperCase(); });
+    if (capitalized) retVal = retVal.charAt(0).toUpperCase() + retVal.slice(1);
+    return retVal;
+};
+
+function getReference(column) {
+    if (column.internal_type != 'reference') return '';
+    return ' >>> ' + column.reference_table;
+};
+
+function getChoiceList(column) {
+    if (column.choice_list != 'true') return '';
+    return ' [Choice List]';
+};
 
 init();
