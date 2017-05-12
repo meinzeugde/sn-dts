@@ -187,18 +187,18 @@ function downloadTableDefinitions() {
             });
 
         for (var i = 0; i < config.tables.length; i++) {
-            requestData(instanceRequest, basePath, baseUrl, config.tables[i]);
+            requestData(instanceRequest, root.host, basePath, baseUrl, config.tables[i]);
         }
     }
 }
 
-function requestData(instanceRequest, basePath, baseUrl, tableName) {
+function requestData(instanceRequest, host, basePath, baseUrl, tableName) {
     instanceRequest(baseUrl + tableName + '.do?SCHEMA', function(error, response, body) {
         if (!error && response.statusCode == 200) {
             //convert body from XML to JSON and parse data
             var parseString = xml2js.parseString;
             parseString(body, function(err, result) {
-                if (!err) {
+                if (!err && !result.error) {
                     //parse JSON data
                     var dtsContent = convertSchemaToDts(tableName, result);
                     if (dtsContent) {
@@ -213,11 +213,11 @@ function requestData(instanceRequest, basePath, baseUrl, tableName) {
                         });
                     }
                 } else {
-                    logit.error('[' + tableName + '] Parsing of XML failed - ' + err);
+                    logit.error('[' + host + '|' + tableName + '] Conversion failed - ' + (err || result.error));
                 }
             });
         } else {
-            logit.error('[' + tableName + '] Connection failed - ' + error + ' (' + response.statusCode + ')');
+            logit.error('[' + host + '|' + tableName + '] Connection failed - ' + (error || body) + ' (' + response.statusCode + ')');
         }
     });
 }
