@@ -186,37 +186,40 @@ function downloadTableDefinitions() {
                 }
             });
 
-        for (var t in config.tables) {
-            var tableName = config.tables[t];
-            instanceRequest(baseUrl + tableName + '.do?SCHEMA', function(error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    //convert body from XML to JSON and parse data
-                    var parseString = xml2js.parseString;
-                    parseString(body, function(err, result) {
-                        if (!err) {
-                            //parse JSON data
-                            var dtsContent = convertSchemaToDts(tableName, result);
-                            if (dtsContent) {
-                                //write to file
-                                var filename = path.resolve(basePath + '/typings/servicenow-dts/GlideRecord/' + tableName + '.d.ts');
-                                fs.outputFile(filename, dtsContent, function(err) {
-                                    if (err) {
-                                        logit.error('Error updating/writing d.ts file. path: ' + filename);
-                                    } else {
-                                        logit.info('Successfully created/updated d.ts file. path: ' + filename);
-                                    }
-                                });
-                            }
-                        } else {
-                            logit.error('[' + tableName + '] Parsing of XML failed - ' + err);
-                        }
-                    });
-                } else {
-                    logit.error('[' + tableName + '] Connection failed - ' + error + ' (' + response.statusCode + ')');
-                }
-            });
+        for (var i = 0; i < config.tables.length; i++) {
+            requestData(instanceRequest, basePath, baseUrl, config.tables[i]);
         }
     }
+}
+
+function requestData(instanceRequest, basePath, baseUrl, tableName) {
+    instanceRequest(baseUrl + tableName + '.do?SCHEMA', function(error, response, body) {
+        if (!error && response.statusCode == 200) {
+            //convert body from XML to JSON and parse data
+            var parseString = xml2js.parseString;
+            parseString(body, function(err, result) {
+                if (!err) {
+                    //parse JSON data
+                    var dtsContent = convertSchemaToDts(tableName, result);
+                    if (dtsContent) {
+                        //write to file
+                        var filename = path.resolve(basePath + '/typings/servicenow-dts/GlideRecord/' + tableName + '.d.ts');
+                        fs.outputFile(filename, dtsContent, function(err) {
+                            if (err) {
+                                logit.error('Error updating/writing d.ts file. path: ' + filename);
+                            } else {
+                                logit.info('Successfully created/updated d.ts file. path: ' + filename);
+                            }
+                        });
+                    }
+                } else {
+                    logit.error('[' + tableName + '] Parsing of XML failed - ' + err);
+                }
+            });
+        } else {
+            logit.error('[' + tableName + '] Connection failed - ' + error + ' (' + response.statusCode + ')');
+        }
+    });
 }
 
 function convertSchemaToDts(tableName, schema) {
