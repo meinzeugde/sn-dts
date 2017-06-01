@@ -37,21 +37,32 @@ npm install
 ``` 
 
 2. Copy the `app.config.json` to the root of your project folder and set your instance and credentials (!)
+
+3. ALTERNATIVE: if you should already have an existing config file from the project `dynamicdan/sn-filesync`, you could also just add the following to that config file (use the name of your config file for the next steps instead of `app.config.json`):
+
+```json
+"tables": [
+    "someTable", "..."
+]
+```
+
 3. In your project folder, open your terminal and run:
 
 ```sh
 node /c/sn-dts/app.js --config ./app.config.json
 ```
 
-4. OPTION: create a shortcut by adding the following line to your .bashrc, don't forget to `source ~/.bashrc` afterwards.
+4. Find the downloaded Definition files in `yourproject/typings/sn-dts/GlideRecord` (Tada!)
+
+## 3. Create Shortcut (in bash)
+
+add the following line to your .bashrc, don't forget to `source ~/.bashrc` afterwards.
 
 ```sh
 alias sndts='node /c/sn-dts/app.js --config ./app.config.json'
 ```
 
-5. Find the downloaded Definition files in `yourproject/typings/sn-dts/GlideRecord` (Tada!)
-
-## 4. Start the script every time you need to update your typescript definitions
+Start the script every time you need to update your typescript definitions:
 
 ```sh
 sndts
