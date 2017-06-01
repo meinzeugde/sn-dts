@@ -68,6 +68,51 @@ Start the script every time you need to update your typescript definitions:
 sndts
 ```
 
+# Using Auto Completion
+
+## 1. Standard GlideRecord instantiation
+
+```js
+var someGr = new GlideRecord('here_the_suggestions_will_popup');
+someGr.hereTheAttributesWillPopup;
+
+someGr.getValue('attribute'); //won't work at the moment, instead use ...
+someGr.attribute.toString();
+
+someGr.getDisplayValue('attribute'); //simply won't work at the moment
+```
+
+## 2. in Business Rules
+
+We need to use a special annotation: `/** @type  {sn.Types.ISomeTable} */`:
+
+Let's assume our current object is a GlideRecord from 'sys_user' table.
+
+```js
+(function executeRule(c, p) {
+    /** @type  {sn.Types.ISysUser} */
+    var current = c;
+    /** @type  {sn.Types.ISysUser} */
+    var previous = c;
+
+    current.hereTheAttributesWillPopup;
+    previous.hereTheAttributesWillPopup;
+
+})(current, previous);
+```
+
+## 3. in References
+
+We need to use a special annotation: `/** @type  {sn.Types.ISomeTable} */`:
+
+Let's assume our attribute is a Reference to 'sys_user' table.
+
+```js
+/** @type  {sn.Types.ISysUser} */
+var test = someGr.user.getRefRecord();
+test.hereTheAttributesWillPopup;
+```
+
 # Development
 
 ## Test
